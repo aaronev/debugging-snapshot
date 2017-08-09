@@ -1,51 +1,35 @@
 const DbContacts = require('../../db/contacts')
-const {renderError} = require('../utils')
-
 const router = require('express').Router()
 
 router.get('/new', (request, response) => {
   response.render('new')
 })
 
-router.post('/', (request, response, next) => {
+router.post('/new', (request, response, next) => {
   DbContacts.createContact(request.body)
-    .then(function(contact) {
-      if (contact) return response.redirect(`/contacts/${contact.id}`)
-      next()
-    })
-    .catch( error => renderError(error, response, response) )
+  .then(contact => { response.redirect(`/contacts/${contact.id}`) })
+  .catch(next)
 })
 
 router.get('/:contactId', (request, response, next) => {
   const contactId = request.params.contactId
-  if (!contactId || !/^\d+$/.test(contactId)) return next()
   DbContacts.getContact(contactId)
-    .then(function(contact) {
-      if (contact) return response.render('show', { contact })
-      next()
-    })
-    .catch( error => renderError(error, response, response) )
+  .then(contact => { response.render('show', { contact }) })
+  .catch(next)
 })
-
 
 router.get('/:contactId/delete', (request, response, next) => {
-  const contactId = request.params.contactID
+  const contactId = request.params.contactId
   DbContacts.deleteContact(contactId)
-    .then(function(contact) {
-      if (contact) return response.redirect('/contacts/${contactId}')
-      next()
-    })
-    .catch( error => renderError(error, response, response) )
+  .then(contact => { response.redirect('/') })
+  .catch(next)
 })
 
-router.get('/search', (request, response, next) => {
-  const query = request.query.q
+router.post('/search', (request, response, next) => {
+  const query = request.body.query
   DbContacts.searchForContact(query)
-    .then(function(contacts) {
-      if (contacts) return response.render('index', { query, contacts })
-      next()
-    })
-    .catch( error => renderError(error, response, response) )
+  .then(contacts => { response.render('index', { query, contacts }) })
+  .catch(next)
 })
 
 module.exports = router

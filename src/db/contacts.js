@@ -13,23 +13,30 @@ const createContact = (contact) =>
       contact.first_name,
       contact.last_name,
     ])
-    .catch(error => error)
+    .then(contact => contact[0])
+    .catch(error => { throw error });
 
-const getContacts = function(){
+const getContacts = () => 
   db.query(`
     SELECT
       *
     FROM
       contacts
     `, [])
-}
+    .catch(error => { throw error })
 
 const getContact = (contactId) =>
   db.one(`
-    SELECT id FROM contacts WHERE id=$1::int LIMIT 1
+    SELECT 
+      * 
+    FROM 
+      contacts 
+    WHERE 
+      id=$1::int 
+    LIMIT 1
     `,
     [contactId])
-    .catch(error => error);
+  .catch(error => { throw error });
 
 
 const deleteContact = (contactId) =>
@@ -38,8 +45,8 @@ const deleteContact = (contactId) =>
       contacts
     WHERE
       id=$1::int
-    `)
-    .catch(error => error)
+    `, contactId)
+    .catch(error => { throw error });
 
 const searchForContact = function(searchQuery){
   return db.query(`
@@ -51,7 +58,7 @@ const searchForContact = function(searchQuery){
       lower(last_name || ' ' || first_name) LIKE $1::text
     `,
     [`%${searchQuery.toLowerCase().replace(/\s+/,'%')}%`])
-    .catch(error => error);
+    .catch(error => { throw error });
 }
 
 module.exports = {
